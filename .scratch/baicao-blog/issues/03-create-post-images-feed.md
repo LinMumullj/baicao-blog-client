@@ -4,7 +4,7 @@
 
 **Blocked by:** #01 — 项目脚手架 + 数据库 + 主题外壳, #02 — 用户注册 & 登录
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] `/api/upload` Route Handler：接收文件类型和数量，生成阿里云 OSS presigned URL 返回给客户端
 - [ ] `/api/posts` POST Route Handler：创建动态（content + media URLs），仅 admin 角色可调用，校验图片数量 ≤ 9

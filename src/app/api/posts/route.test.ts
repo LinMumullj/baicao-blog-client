@@ -141,6 +141,101 @@ describe("POST /api/posts", () => {
     const res = await POST(req);
     expect(res.status).toBe(400);
   });
+
+  it("图视频互斥提交 → 400", async () => {
+    mockedAuth.mockResolvedValue({
+      user: { id: "admin-id", name: "admin", role: "ADMIN" },
+      expires: "",
+    } as ReturnType<typeof auth> extends Promise<infer T> ? T : never);
+
+    const req = makePostRequest({
+      content: "混合媒体测试",
+      mediaUrls: [
+        { url: "https://oss.example.com/photo.jpg", type: "image" },
+        { url: "https://oss.example.com/clip.mp4", type: "video" },
+      ],
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toBe("图片和视频不能同时上传");
+  });
+
+  it("视频动态创建 → 201", async () => {
+    mockedAuth.mockResolvedValue({
+      user: { id: "admin-id", name: "admin", role: "ADMIN" },
+      expires: "",
+    } as ReturnType<typeof auth> extends Promise<infer T> ? T : never);
+
+    const createdPost = {
+      id: "video-post",
+      content: "视频动态",
+      title: null,
+      isLongPost: false,
+      mediaType: "VIDEO",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      authorId: "admin-id",
+    };
+
+    vi.mocked(db.$transaction).mockImplementation(async (fn: unknown) => {
+      if (typeof fn === "function") {
+        return fn({
+          post: { create: vi.fn().mockResolvedValue(createdPost) },
+          media: { createMany: vi.fn().mockResolvedValue({ count: 1 }) },
+        });
+      }
+      return fn;
+    });
+
+    const req = makePostRequest({
+      content: "视频动态",
+      mediaUrls: [
+        { url: "https://oss.example.com/video.mp4", type: "video" },
+      ],
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+  });
+
+  it("长文动态创建 → 201", async () => {
+    mockedAuth.mockResolvedValue({
+      user: { id: "admin-id", name: "admin", role: "ADMIN" },
+      expires: "",
+    } as ReturnType<typeof auth> extends Promise<infer T> ? T : never);
+
+    const createdPost = {
+      id: "long-post",
+      content: "这是一篇长文的正文内容",
+      title: "长文标题",
+      isLongPost: true,
+      mediaType: "NONE",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      authorId: "admin-id",
+    };
+
+    vi.mocked(db.$transaction).mockImplementation(async (fn: unknown) => {
+      if (typeof fn === "function") {
+        return fn({
+          post: { create: vi.fn().mockResolvedValue(createdPost) },
+          media: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        });
+      }
+      return fn;
+    });
+
+    const req = makePostRequest({
+      content: "这是一篇长文的正文内容",
+      title: "长文标题",
+      isLongPost: true,
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+  });
 });
 
 describe("GET /api/posts", () => {
