@@ -1,5 +1,6 @@
 import { Cat } from "lucide-react";
 import { PostFeed } from "@/components/post-feed";
+import { TagFilter } from "@/components/tag-filter";
 
 interface HomePageProps {
   searchParams: Promise<{ tag?: string }>;
