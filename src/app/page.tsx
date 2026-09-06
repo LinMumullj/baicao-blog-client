@@ -1,6 +1,13 @@
 import { Cat } from "lucide-react";
+import { PostFeed } from "@/components/post-feed";
 
-export default function Home() {
+interface HomePageProps {
+  searchParams: Promise<{ tag?: string }>;
+}
+
+export default async function Home({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+
   return (
     <div>
       {/* Hero Section */}
@@ -9,20 +16,20 @@ export default function Home() {
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
           百草
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          记录生活，分享日常
-        </p>
+        <p className="mt-2 text-muted-foreground">记录生活，分享日常</p>
       </section>
 
       {/* Feed Section */}
-      <section className="mx-auto max-w-3xl px-4 py-12">
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Cat className="mb-4 h-12 w-12 text-muted-foreground" />
-          <p className="text-lg text-muted-foreground">还没有动态</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            等管理员发布第一条动态吧 🐾
-          </p>
-        </div>
+      <section className="mx-auto max-w-3xl">
+        {params.tag && (
+          <div className="border-b border-border px-4 py-3">
+            <span className="text-sm text-muted-foreground">
+              筛选标签：
+            </span>
+            <span className="ml-1 text-sm font-medium">#{params.tag}</span>
+          </div>
+        )}
+        <PostFeed tag={params.tag} />
       </section>
     </div>
   );
