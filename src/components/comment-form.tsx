@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface CommentFormProps {
   postId: string;
@@ -16,12 +19,17 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
 
   if (!session?.user) {
     return (
-      <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
-        <Link href="/login" className="underline underline-offset-4 hover:text-black dark:hover:text-white">
-          登录
-        </Link>
-        后评论
-      </div>
+      <Card className="border-border/60 shadow-none">
+        <CardContent className="py-4 text-center text-sm text-muted-foreground">
+          <Link
+            href="/login"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            登录
+          </Link>
+          后评论
+        </CardContent>
+      </Card>
     );
   }
 
@@ -48,21 +56,21 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <textarea
+      <Textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="写下你的评论..."
         rows={3}
-        className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-black outline-none placeholder:text-neutral-400 focus:border-black dark:border-neutral-800 dark:bg-neutral-950 dark:text-white dark:placeholder:text-neutral-600 dark:focus:border-white"
+        className="resize-none"
       />
       <div className="flex justify-end">
-        <button
+        <Button
           type="submit"
+          size="sm"
           disabled={!content.trim() || submitting}
-          className="rounded-lg bg-black px-4 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-40 dark:bg-white dark:text-black"
         >
           {submitting ? "提交中..." : "发表评论"}
-        </button>
+        </Button>
       </div>
     </form>
   );

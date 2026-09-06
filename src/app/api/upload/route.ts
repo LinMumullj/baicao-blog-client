@@ -1,6 +1,19 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { generateUploadParams } from "@/lib/oss";
+import { uploadFileToOSS } from "@/lib/oss";
+
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+];
+const ALLOWED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
+];
+const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
 
 export async function POST(request: Request) {
   try {
@@ -10,10 +23,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "请先登录" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { files } = body;
+    const formData = await request.formData();
+    const files = formData.getAll("files").filter(
+      (item): item is File => item instanceof File
+    );
 
-    if (!files || !Array.isArray(files) || files.length === 0) {
+    if (files.length === 0) {
       return NextResponse.json(
         { error: "请选择要上传的文件" },
         { status: 400 }
@@ -27,32 +42,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const allowedImageTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "image/webp",
-    ];
-    const allowedVideoTypes = [
-      "video/mp4",
-      "video/quicktime",
-      "video/webm",
-    ];
-    const allowedTypes = [...allowedImageTypes, ...allowedVideoTypes];
-
-    const uploadParams = files.map(
-      (file: { name: string; type: string }) => {
-        if (!allowedTypes.includes(file.type)) {
+    const uploads = await Promise.all(
+      files.map(async (file) => {
+        if (!ALLOWED_TYPES.includes(file.type)) {
           throw new Error(`不支持的文件类型: ${file.type}`);
         }
-        return generateUploadParams(file.name, file.type);
-      }
+
+        const result = await uploadFileToOSS(file, file.name, file.type);
+        return {
+          url: result.url,
+          type: file.type.startsWith("video/") ? "video" : "image",
+        };
+      })
     );
 
-    return NextResponse.json({ uploads: uploadParams });
+    return NextResponse.json({ uploads });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "上传参数生成失败";
+      error instanceof Error ? error.message : "上传失败";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

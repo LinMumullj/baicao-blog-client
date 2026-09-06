@@ -1,6 +1,10 @@
 import Link from "next/link";
-import { Heart, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { MediaGrid } from "@/components/media-grid";
+import { UserAvatar } from "@/components/user-avatar";
+import { LikeButton } from "@/components/like-button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface PostCardProps {
   post: {
@@ -9,6 +13,7 @@ interface PostCardProps {
     title?: string | null;
     isLongPost: boolean;
     createdAt: string;
+    isLiked?: boolean;
     author: {
       id: string;
       username: string;
@@ -52,65 +57,71 @@ export function PostCard({ post }: PostCardProps) {
       : post.content;
 
   return (
-    <article className="border-b border-border px-4 py-5">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-bold">
-          {post.author.username.charAt(0).toUpperCase()}
+    <Card className="gap-0 rounded-xl border-border/40 bg-background/80 py-0 shadow-sm backdrop-blur-md transition-colors hover:bg-background/90">
+      <CardContent className="px-4 py-5">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <UserAvatar
+            username={post.author.username}
+            avatar={post.author.avatar}
+          />
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium">{post.author.username}</span>
+            <span className="ml-2 text-xs text-muted-foreground">
+              {formatTime(post.createdAt)}
+            </span>
+          </div>
         </div>
-        <div className="flex-1">
-          <span className="text-sm font-medium">{post.author.username}</span>
-          <span className="ml-2 text-xs text-muted-foreground">
-            {formatTime(post.createdAt)}
-          </span>
-        </div>
-      </div>
 
-      {/* Content */}
-      <Link href={`/post/${post.id}`} className="block">
-        {post.title && (
-          <h2 className="mt-3 text-lg font-bold">{post.title}</h2>
-        )}
-        <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">
-          {displayContent}
-        </p>
-        {post.isLongPost && post.content.length > 200 && (
-          <span className="text-sm text-muted-foreground">查看全文</span>
-        )}
-      </Link>
-
-      {/* Media */}
-      <MediaGrid media={post.media} />
-
-      {/* Tags */}
-      {post.postTags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1">
-          {post.postTags.map(({ tag }) => (
-            <Link
-              key={tag.id}
-              href={`/?tag=${encodeURIComponent(tag.name)}`}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              #{tag.name}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="mt-3 flex items-center gap-6 text-muted-foreground">
-        <Link
-          href={`/post/${post.id}`}
-          className="flex items-center gap-1 text-xs transition-colors hover:text-foreground"
-        >
-          <MessageCircle className="h-4 w-4" />
-          {post._count.comments > 0 && post._count.comments}
+        {/* Content */}
+        <Link href={`/post/${post.id}`} className="block">
+          {post.title && (
+            <h2 className="mt-3 text-lg font-semibold tracking-tight">
+              {post.title}
+            </h2>
+          )}
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+            {displayContent}
+          </p>
+          {post.isLongPost && post.content.length > 200 && (
+            <span className="mt-1 inline-block text-sm text-muted-foreground hover:text-foreground">
+              查看全文 →
+            </span>
+          )}
         </Link>
-        <div className="flex items-center gap-1 text-xs">
-          <Heart className="h-4 w-4" />
-          {post._count.likes > 0 && post._count.likes}
+
+        {/* Media */}
+        <MediaGrid media={post.media} />
+
+        {/* Tags */}
+        {post.postTags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {post.postTags.map(({ tag }) => (
+              <Badge key={tag.id} variant="secondary" asChild>
+                <Link href={`/?tag=${encodeURIComponent(tag.name)}`}>
+                  #{tag.name}
+                </Link>
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="mt-4 flex items-center gap-2">
+          <LikeButton
+            postId={post.id}
+            initialLikeCount={post._count.likes}
+            initialIsLiked={post.isLiked ?? false}
+          />
+          <Link
+            href={`/post/${post.id}`}
+            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <MessageCircle className="h-4 w-4" />
+            {post._count.comments > 0 && post._count.comments}
+          </Link>
         </div>
-      </div>
-    </article>
+      </CardContent>
+    </Card>
   );
 }

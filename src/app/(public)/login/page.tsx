@@ -1,13 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Cat } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -33,7 +46,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/");
+      router.push(callbackUrl);
       router.refresh();
     } catch {
       setError("登录失败，请稍后重试");
@@ -43,63 +56,60 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="flex flex-col items-center gap-2">
-          <Cat className="h-10 w-10" />
-          <h1 className="text-2xl font-bold">欢迎回来</h1>
-          <p className="text-sm text-muted-foreground">登录你的百草账号</p>
-        </div>
+    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-sm border-border/60 shadow-lg">
+        <CardHeader className="items-center text-center">
+          <Cat className="mb-2 h-10 w-10" />
+          <CardTitle className="text-2xl">欢迎回来</CardTitle>
+          <CardDescription>登录你的百草账号</CardDescription>
+        </CardHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="username" className="text-sm font-medium">
-              用户名
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              required
-              className="w-full border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring"
-              placeholder="输入用户名"
-            />
-          </div>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">用户名</Label>
+              <Input
+                id="username"
+                name="username"
+                type="text"
+                required
+                placeholder="输入用户名"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              密码
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              className="w-full border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring"
-              placeholder="输入密码"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">密码</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                placeholder="输入密码"
+              />
+            </div>
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full border border-foreground bg-foreground py-2 text-sm font-medium text-background transition-colors hover:bg-background hover:text-foreground disabled:opacity-50"
-          >
-            {loading ? "登录中..." : "登录"}
-          </button>
-        </form>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "登录中..." : "登录"}
+            </Button>
+          </form>
+        </CardContent>
 
-        <p className="text-center text-sm text-muted-foreground">
-          还没有账号？{" "}
-          <Link href="/register" className="text-foreground underline">
-            注册
-          </Link>
-        </p>
-      </div>
+        <CardFooter className="justify-center">
+          <p className="text-sm text-muted-foreground">
+            还没有账号？{" "}
+            <Link
+              href="/register"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              注册
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

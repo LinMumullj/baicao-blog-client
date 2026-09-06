@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 
 interface Tag {
   id: string;
@@ -26,29 +27,23 @@ export function TagFilter({ currentTag }: TagFilterProps) {
   if (tags.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
-      <button
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/40 bg-background/60 px-4 py-3 backdrop-blur-sm">
+      <Badge
+        variant={!currentTag ? "default" : "outline"}
+        className="cursor-pointer transition-colors"
         onClick={() => router.push("/")}
-        className={`rounded-full border px-2 py-0.5 text-xs transition-colors ${
-          !currentTag
-            ? "bg-foreground text-background"
-            : "border-border hover:bg-muted"
-        }`}
       >
         全部
-      </button>
+      </Badge>
       {tags.map((tag) => (
-        <button
+        <Badge
           key={tag.id}
+          variant={currentTag === tag.name ? "default" : "outline"}
+          className="cursor-pointer transition-colors"
           onClick={() => router.push(`/?tag=${encodeURIComponent(tag.name)}`)}
-          className={`rounded-full border px-2 py-0.5 text-xs transition-colors ${
-            currentTag === tag.name
-              ? "bg-foreground text-background"
-              : "border-border hover:bg-muted"
-          }`}
         >
           {tag.name}
-        </button>
+        </Badge>
       ))}
     </div>
   );

@@ -12,10 +12,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "请先登录" }, { status: 401 });
     }
 
-    if ((session.user as { role: string }).role !== "ADMIN") {
-      return NextResponse.json({ error: "仅管理员可发布动态" }, { status: 403 });
-    }
-
     const body = await request.json();
     const { content, title, isLongPost, mediaUrls, tags } = body;
 
@@ -101,6 +97,9 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    const session = await auth();
+    const userId = session?.user?.id;
+
     const { searchParams } = new URL(request.url);
     const cursor = searchParams.get("cursor");
     const limit = Math.min(
@@ -137,8 +136,25 @@ export async function GET(request: Request) {
       nextCursor = nextItem!.id;
     }
 
+    let likedPostIds = new Set<string>();
+    if (userId && posts.length > 0) {
+      const likes = await db.like.findMany({
+        where: {
+          userId,
+          postId: { in: posts.map((p) => p.id) },
+        },
+        select: { postId: true },
+      });
+      likedPostIds = new Set(likes.map((l) => l.postId));
+    }
+
+    const postsWithLikeStatus = posts.map((post) => ({
+      ...post,
+      isLiked: likedPostIds.has(post.id),
+    }));
+
     return NextResponse.json({
-      posts,
+      posts: postsWithLikeStatus,
       nextCursor,
     });
   } catch {

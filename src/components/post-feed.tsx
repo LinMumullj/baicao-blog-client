@@ -10,6 +10,7 @@ interface Post {
   title?: string | null;
   isLongPost: boolean;
   createdAt: string;
+  isLiked?: boolean;
   author: { id: string; username: string; avatar?: string | null };
   media: { id: string; url: string; type: string; order: number }[];
   postTags: { tag: { id: string; name: string } }[];
@@ -18,9 +19,10 @@ interface Post {
 
 interface PostFeedProps {
   tag?: string;
+  refreshKey?: number;
 }
 
-export function PostFeed({ tag }: PostFeedProps) {
+export function PostFeed({ tag, refreshKey = 0 }: PostFeedProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,7 +52,7 @@ export function PostFeed({ tag }: PostFeedProps) {
       setNextCursor(data.nextCursor);
       setLoading(false);
     });
-  }, [fetchPosts]);
+  }, [fetchPosts, refreshKey]);
 
   useEffect(() => {
     if (!observerRef.current || !nextCursor) return;
@@ -93,7 +95,7 @@ export function PostFeed({ tag }: PostFeedProps) {
   }
 
   return (
-    <div>
+    <div className="space-y-4">
       {posts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}

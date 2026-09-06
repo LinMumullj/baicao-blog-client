@@ -30,6 +30,9 @@ vi.mock("@/lib/db", () => ({
     media: {
       createMany: vi.fn(),
     },
+    like: {
+      findMany: vi.fn(),
+    },
     $transaction: vi.fn(),
   },
 }));
@@ -42,6 +45,7 @@ const { db } = await import("@/lib/db");
 const { auth } = await import("@/lib/auth");
 const mockedAuth = vi.mocked(auth);
 const findMany = vi.mocked(db.post.findMany);
+const likeFindMany = vi.mocked(db.like.findMany);
 
 function makePostRequest(body: Record<string, unknown>) {
   return new Request("http://localhost:3000/api/posts", {
@@ -103,16 +107,37 @@ describe("POST /api/posts", () => {
     expect(res.status).toBe(201);
   });
 
-  it("member 创建动态 → 403", async () => {
+  it("member 创建动态 → 201", async () => {
     mockedAuth.mockResolvedValue({
       user: { id: "member-id", name: "member", role: "MEMBER" },
       expires: "",
     } as ReturnType<typeof auth> extends Promise<infer T> ? T : never);
 
+    const createdPost = {
+      id: "member-post",
+      content: "测试",
+      title: null,
+      isLongPost: false,
+      mediaType: "NONE",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      authorId: "member-id",
+    };
+
+    vi.mocked(db.$transaction).mockImplementation(async (fn: unknown) => {
+      if (typeof fn === "function") {
+        return fn({
+          post: { create: vi.fn().mockResolvedValue(createdPost) },
+          media: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        });
+      }
+      return fn;
+    });
+
     const req = makePostRequest({ content: "测试" });
     const res = await POST(req);
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(201);
   });
 
   it("未登录 → 401", async () => {
@@ -242,6 +267,8 @@ describe("GET /api/posts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     findMany.mockResolvedValue(mockPosts as never);
+    likeFindMany.mockResolvedValue([]);
+    mockedAuth.mockResolvedValue(null as ReturnType<typeof auth> extends Promise<infer T> ? T : never);
   });
 
   it("返回动态列表", async () => {

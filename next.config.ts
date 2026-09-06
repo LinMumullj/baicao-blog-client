@@ -6,11 +6,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.aliyuncs.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.oss-cn-*.aliyuncs.com",
+        hostname: "mybaicao.oss-cn-shenzhen.aliyuncs.com",
+        pathname: "/**",
       },
     ],
   },

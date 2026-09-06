@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { PostFeed } from "@/components/post-feed";
-import { TagFilter } from "@/components/tag-filter";
+import { Suspense } from "react";
+import { HomeContent } from "@/components/home-content";
+import { PostLeaderboard } from "@/components/post-leaderboard";
 
 interface HomePageProps {
   searchParams: Promise<{ tag?: string }>;
@@ -10,38 +11,42 @@ export default async function Home({ searchParams }: HomePageProps) {
   const params = await searchParams;
 
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="relative flex h-[60vh] flex-col items-center justify-center overflow-hidden">
+    <div className="relative min-h-[calc(100vh-3.5rem)]">
+      {/* 全页背景 */}
+      <div className="pointer-events-none fixed inset-0 z-0">
         <Image
           src="/images/hero-cover.png"
-          alt="百草博客封面 — 奶牛猫"
+          alt="百草博客背景"
           fill
           priority
+          sizes="100vw"
           className="object-cover object-[center_60%]"
         />
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 flex flex-col items-center text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
-            百草
-          </h1>
-          <p className="mt-2 text-white/80">记录生活，分享日常</p>
-        </div>
-      </section>
+        <div className="absolute inset-0 bg-black/55" />
+      </div>
 
-      {/* Feed Section */}
-      <section className="mx-auto max-w-3xl">
-        <TagFilter currentTag={params.tag} />
-        {params.tag && (
-          <div className="border-b border-border px-4 py-3">
-            <span className="text-sm text-muted-foreground">
-              筛选标签：
-            </span>
-            <span className="ml-1 text-sm font-medium">#{params.tag}</span>
-          </div>
-        )}
-        <PostFeed tag={params.tag} />
-      </section>
+      <div className="relative z-10 mx-auto max-w-6xl px-4 py-6">
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold tracking-tight">百草</h1>
+          <p className="mt-1 text-sm text-white/60">记录生活，分享日常</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
+          <aside className="lg:sticky lg:top-20 lg:self-start">
+            <Suspense
+              fallback={
+                <div className="h-48 rounded-xl border border-border/40 bg-background/60 backdrop-blur-md" />
+              }
+            >
+              <PostLeaderboard />
+            </Suspense>
+          </aside>
+
+          <main>
+            <HomeContent tag={params.tag} />
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

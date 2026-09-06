@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useRef } from "react";
 import { X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface Tag {
   id: string;
@@ -29,7 +32,7 @@ export function TagInput({ value, onChange }: TagInputProps) {
   const suggestions = allTags.filter(
     (tag) =>
       !value.includes(tag.name) &&
-      tag.name.toLowerCase().includes(input.toLowerCase()),
+      tag.name.toLowerCase().includes(input.toLowerCase())
   );
 
   function addTag(name: string) {
@@ -60,30 +63,27 @@ export function TagInput({ value, onChange }: TagInputProps) {
 
   return (
     <div className="space-y-2">
-      {/* Selected tags */}
       {value.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {value.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs"
-            >
+            <Badge key={tag} variant="secondary" className="gap-1 pr-1">
               {tag}
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={() => removeTag(tag)}
-                className="text-muted-foreground hover:text-foreground"
+                className="h-4 w-4 hover:bg-transparent"
               >
                 <X className="h-3 w-3" />
-              </button>
-            </span>
+              </Button>
+            </Badge>
           ))}
         </div>
       )}
 
-      {/* Input */}
       <div className="relative">
-        <input
+        <Input
           ref={inputRef}
           type="text"
           value={input}
@@ -95,19 +95,17 @@ export function TagInput({ value, onChange }: TagInputProps) {
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           onKeyDown={handleKeyDown}
           placeholder="输入标签，按回车添加"
-          className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-foreground"
         />
 
-        {/* Suggestions dropdown */}
         {showSuggestions && input && suggestions.length > 0 && (
-          <div className="absolute top-full z-10 mt-1 w-full rounded-md border border-border bg-background shadow-sm">
+          <div className="absolute top-full z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-card shadow-lg">
             {suggestions.map((tag) => (
               <button
                 key={tag.id}
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => addTag(tag.name)}
-                className="flex w-full items-center justify-between px-3 py-1.5 text-left text-sm hover:bg-muted"
+                className="flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
               >
                 <span>{tag.name}</span>
                 <span className="text-xs text-muted-foreground">

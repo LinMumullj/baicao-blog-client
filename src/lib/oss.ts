@@ -33,6 +33,7 @@ export function generateUploadParams(filename: string, contentType: string) {
         { bucket: config.bucket },
         { key },
         ["starts-with", "$Content-Type", contentType.split("/")[0]],
+        { "x-oss-object-acl": "public-read" },
       ],
     })
   ).toString("base64");
@@ -54,4 +55,29 @@ export function generateUploadParams(filename: string, contentType: string) {
     accessKeyId: config.accessKeyId,
     url: `${host}/${key}`,
   };
+}
+
+export async function uploadFileToOSS(
+  file: Blob,
+  filename: string,
+  contentType: string
+) {
+  const params = generateUploadParams(filename, contentType);
+
+  const formData = new FormData();
+  formData.append("key", params.key);
+  formData.append("policy", params.policy);
+  formData.append("OSSAccessKeyId", params.accessKeyId);
+  formData.append("Signature", params.signature);
+  formData.append("Content-Type", contentType);
+  formData.append("x-oss-object-acl", "public-read");
+  formData.append("file", file, filename);
+
+  const res = await fetch(params.host, { method: "POST", body: formData });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`OSS 上传失败: ${res.status} ${text}`);
+  }
+
+  return { url: params.url, type: contentType };
 }

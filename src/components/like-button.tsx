@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface LikeButtonProps {
   postId: string;
@@ -62,15 +63,17 @@ export function LikeButton({
   }
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={handleClick}
       disabled={pending}
-      className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+      className="h-8 gap-1.5 px-2 text-muted-foreground hover:text-foreground"
     >
       <Heart
-        className={`h-4 w-4 ${liked ? "fill-white text-white" : ""}`}
+        className={`h-4 w-4 transition-colors ${liked ? "fill-foreground text-foreground" : ""}`}
       />
-      {likeCount > 0 && likeCount}
-    </button>
+      {likeCount > 0 && <span className="text-xs">{likeCount}</span>}
+    </Button>
   );
 }
