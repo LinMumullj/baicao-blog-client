@@ -1,0 +1,25 @@
+---
+description: 测试运行规范，控制测试输出量以减少上下文污染。当运行测试、验证代码、执行 vitest 时应用。
+globs: 
+alwaysApply: true
+---
+
+# 测试运行规范
+
+## 执行原则
+
+1. **优先单测**：始终优先运行单个测试文件而非全量 suite
+   - 正确：`npx vitest run src/app/api/posts/route.test.ts`
+   - 避免：`npx vitest run`（除非明确要求全量或最终验证）
+
+2. **输出精简**：
+   - 测试全部通过时，只报告：`All N tests passed` + 耗时
+   - 测试失败时，只贴：失败的测试名 + 错误消息前 5 行 + assertion 差异
+   - 禁止贴出完整堆栈、通过测试的详情、Vite 构建日志
+
+3. **管道限制**：当确实需要跑全量测试时，使用管道限制输出
+   - `npx vitest run 2>&1 | Select-String -Pattern "(FAIL|PASS|Tests|Duration)"`
+
+4. **失败后行为**：
+   - 分析失败原因并修复，不要重复贴出已经在上下文中的相同错误
+   - 修复后只重跑失败的那个测试文件验证
