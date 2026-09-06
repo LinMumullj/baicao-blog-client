@@ -1,5 +1,6 @@
 import { Cat } from "lucide-react";
 import { PostFeed } from "@/components/post-feed";
+import { TagFilter } from "@/components/tag-filter";
 
 interface HomePageProps {
   searchParams: Promise<{ tag?: string }>;
@@ -21,6 +22,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 
       {/* Feed Section */}
       <section className="mx-auto max-w-3xl">
+        <TagFilter currentTag={params.tag} />
         {params.tag && (
           <div className="border-b border-border px-4 py-3">
             <span className="text-sm text-muted-foreground">
