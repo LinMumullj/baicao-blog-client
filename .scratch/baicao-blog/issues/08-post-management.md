@@ -4,11 +4,11 @@
 
 **Blocked by:** #03 — 发布动态 + 图片上传 + 首页 Feed, #05 — 标签 & 筛选
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `/admin/posts` 页面：动态管理列表，显示摘要、时间、标签、互动数据，每行有"编辑"和"删除"操作
-- [ ] `/admin/posts/[id]/edit` 页面：编辑表单，预填现有内容、标题、标签，可修改后保存
-- [ ] `/api/posts/[id]` PUT Route Handler：更新动态的 content、title、tags，仅 admin
-- [ ] `/api/posts/[id]` DELETE Route Handler：删除动态 + 级联删除 Media、Comment、Like 记录，仅 admin
-- [ ] 删除前确认弹窗（"确定删除这条动态？关联的评论和点赞将一并删除"）
-- [ ] Tests：编辑动态 200、删除动态级联清除 200、非 admin 编辑/删除 403
+- [x] `/admin/posts` 页面：动态管理列表，显示摘要、时间、标签、互动数据，每行有"编辑"和"删除"操作
+- [x] `/admin/posts/[id]/edit` 页面：编辑表单，预填现有内容、标题、标签，可修改后保存
+- [x] `/api/posts/[id]` PUT Route Handler：更新动态的 content、title、tags，仅 admin
+- [x] `/api/posts/[id]` DELETE Route Handler：删除动态 + 级联删除 Media、Comment、Like 记录，仅 admin
+- [x] 删除前确认弹窗（"确定删除这条动态？关联的评论和点赞将一并删除"）
+- [x] Tests：编辑动态 200、删除动态级联清除 200、非 admin 编辑/删除 403

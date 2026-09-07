@@ -1,13 +1,16 @@
 "use client";
 
-import { Cat, LogOut } from "lucide-react";
+import { Cat, LogOut, Menu, Settings, Shield } from "lucide-react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 
 export function Navbar() {
   const { data: session, status } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/40 bg-background/60 backdrop-blur-md">
@@ -20,17 +23,32 @@ export function Navbar() {
           <span className="text-lg font-bold tracking-tight">百草</span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="hidden items-center gap-2 sm:flex">
           {status === "loading" ? (
             <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
           ) : session?.user ? (
             <>
+              {isAdmin && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/admin/posts">
+                    <Shield className="h-4 w-4" />
+                    管理
+                  </Link>
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/settings">
+                  <Settings className="h-4 w-4" />
+                  设置
+                </Link>
+              </Button>
               <div className="flex items-center gap-2 pl-1">
                 <UserAvatar
                   username={session.user.name ?? "?"}
+                  avatar={session.user.avatar}
                   size="sm"
                 />
-                <span className="hidden text-sm text-muted-foreground sm:inline">
+                <span className="text-sm text-muted-foreground">
                   {session.user.name}
                 </span>
               </div>
@@ -54,7 +72,50 @@ export function Navbar() {
             </>
           )}
         </div>
+
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="sm:hidden"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label="菜单"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
       </nav>
+
+      {menuOpen && session?.user && (
+        <div className="border-t border-border/40 bg-background/95 px-4 py-3 sm:hidden">
+          <div className="flex items-center gap-3 pb-3">
+            <UserAvatar
+              username={session.user.name ?? "?"}
+              avatar={session.user.avatar}
+            />
+            <span className="text-sm font-medium">{session.user.name}</span>
+          </div>
+          <div className="flex flex-col gap-2">
+            {isAdmin && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/admin/posts" onClick={() => setMenuOpen(false)}>
+                  动态管理
+                </Link>
+              </Button>
+            )}
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/settings" onClick={() => setMenuOpen(false)}>
+                个人设置
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+            >
+              登出
+            </Button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -37,22 +37,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           name: user.username,
           role: user.role,
+          avatar: user.avatar,
         };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = (user as { role: string }).role;
+        token.avatar = (user as { avatar?: string | null }).avatar ?? null;
+      }
+      if (trigger === "update" && session?.avatar !== undefined) {
+        token.avatar = session.avatar as string | null;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        (session.user as { role: string }).role = token.role as string;
+        session.user.role = token.role as string;
+        session.user.avatar = (token.avatar as string | null) ?? null;
       }
       return session;
     },

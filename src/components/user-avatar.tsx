@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Cat } from "lucide-react";
 
 interface UserAvatarProps {
   username: string;
@@ -18,8 +19,9 @@ export function UserAvatar({
   return (
     <Avatar size={size} className={className}>
       {avatar && <AvatarImage src={avatar} alt={username} />}
-      <AvatarFallback className="bg-muted text-xs font-medium">
-        {initial}
+      <AvatarFallback className="bg-muted text-muted-foreground">
+        <Cat className="size-4" aria-hidden />
+        <span className="sr-only">{initial}</span>
       </AvatarFallback>
     </Avatar>
   );

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { UserAvatar } from "@/components/user-avatar";
-import { Loader2 } from "lucide-react";
+import { CatLoader } from "@/components/cat-loader";
 
 interface Comment {
   id: string;
@@ -36,11 +36,7 @@ export function CommentList({ postId, refreshKey = 0 }: CommentListProps) {
   }, [fetchComments, refreshKey]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <CatLoader label="加载评论中..." />;
   }
 
   if (comments.length === 0) {

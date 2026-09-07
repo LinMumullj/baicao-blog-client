@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PostCard } from "@/components/post-card";
-import { Cat, Loader2 } from "lucide-react";
+import { CatLoader } from "@/components/cat-loader";
+import { Cat } from "lucide-react";
 
 interface Post {
   id: string;
@@ -75,11 +76,7 @@ export function PostFeed({ tag, refreshKey = 0 }: PostFeedProps) {
   }, [nextCursor, loadingMore, fetchPosts]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <CatLoader />;
   }
 
   if (posts.length === 0) {
@@ -104,7 +101,7 @@ export function PostFeed({ tag, refreshKey = 0 }: PostFeedProps) {
       <div ref={observerRef} className="h-10">
         {loadingMore && (
           <div className="flex justify-center py-4">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <CatLoader label="加载更多..." />
           </div>
         )}
       </div>
