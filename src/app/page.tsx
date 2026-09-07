@@ -26,11 +26,6 @@ export default async function Home({ searchParams }: HomePageProps) {
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-6">
-        <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">百草</h1>
-          <p className="mt-1 text-sm text-white/60">记录生活，分享日常</p>
-        </div>
-
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
           <aside className="lg:sticky lg:top-20 lg:self-start">
             <Suspense

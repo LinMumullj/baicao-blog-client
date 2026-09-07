@@ -20,7 +20,7 @@ export function Navbar() {
           className="flex items-center gap-2 text-foreground transition-opacity hover:opacity-80"
         >
           <Cat className="h-6 w-6" />
-          <span className="text-lg font-bold tracking-tight">百草</span>
+          <span className="text-lg font-bold tracking-tight">BAICAO</span>
         </Link>
 
         <div className="hidden items-center gap-2 sm:flex">
