@@ -4,7 +4,7 @@ import { HomeContent } from "@/components/home-content";
 import { PostLeaderboard } from "@/components/post-leaderboard";
 
 interface HomePageProps {
-  searchParams: Promise<{ tag?: string }>;
+  searchParams: Promise<{ tag?: string; author?: string }>;
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
@@ -38,7 +38,7 @@ export default async function Home({ searchParams }: HomePageProps) {
           </aside>
 
           <main>
-            <HomeContent tag={params.tag} />
+            <HomeContent tag={params.tag} author={params.author} />
           </main>
         </div>
       </div>

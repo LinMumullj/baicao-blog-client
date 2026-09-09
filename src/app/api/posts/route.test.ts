@@ -291,4 +291,35 @@ describe("GET /api/posts", () => {
     expect(res.status).toBe(200);
     expect(data.posts).toBeDefined();
   });
+
+  it("支持 author 筛选", async () => {
+    findMany.mockResolvedValue([] as never);
+
+    const req = makeGetRequest({ author: "admin" });
+    const res = await GET(req);
+
+    expect(res.status).toBe(200);
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { author: { username: "admin" } },
+      })
+    );
+  });
+
+  it("支持 tag 与 author 叠加筛选", async () => {
+    findMany.mockResolvedValue([] as never);
+
+    const req = makeGetRequest({ tag: "日常", author: "admin" });
+    const res = await GET(req);
+
+    expect(res.status).toBe(200);
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          postTags: { some: { tag: { name: "日常" } } },
+          author: { username: "admin" },
+        },
+      })
+    );
+  });
 });

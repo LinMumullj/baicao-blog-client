@@ -61,12 +61,22 @@ export function PostCard({ post }: PostCardProps) {
       <CardContent className="px-4 py-5">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <UserAvatar
-            username={post.author.username}
-            avatar={post.author.avatar}
-          />
+          <Link
+            href={`/user/${encodeURIComponent(post.author.username)}`}
+            className="shrink-0 rounded-full transition-opacity hover:opacity-80"
+          >
+            <UserAvatar
+              username={post.author.username}
+              avatar={post.author.avatar}
+            />
+          </Link>
           <div className="flex-1 min-w-0">
-            <span className="text-sm font-medium">{post.author.username}</span>
+            <Link
+              href={`/user/${encodeURIComponent(post.author.username)}`}
+              className="text-sm font-medium hover:underline"
+            >
+              {post.author.username}
+            </Link>
             <span className="ml-2 text-xs text-muted-foreground">
               {formatTime(post.createdAt)}
             </span>

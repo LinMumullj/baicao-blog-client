@@ -20,10 +20,11 @@ interface Post {
 
 interface PostFeedProps {
   tag?: string;
+  author?: string;
   refreshKey?: number;
 }
 
-export function PostFeed({ tag, refreshKey = 0 }: PostFeedProps) {
+export function PostFeed({ tag, author, refreshKey = 0 }: PostFeedProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,12 +36,13 @@ export function PostFeed({ tag, refreshKey = 0 }: PostFeedProps) {
       const params = new URLSearchParams();
       if (cursor) params.set("cursor", cursor);
       if (tag) params.set("tag", tag);
+      if (author) params.set("author", author);
 
       const res = await fetch(`/api/posts?${params.toString()}`);
       const data = await res.json();
       return data;
     },
-    [tag]
+    [tag, author]
   );
 
   useEffect(() => {

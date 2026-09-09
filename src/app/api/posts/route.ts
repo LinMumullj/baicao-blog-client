@@ -107,10 +107,20 @@ export async function GET(request: Request) {
       50
     );
     const tag = searchParams.get("tag");
+    const author = searchParams.get("author");
 
-    const where = tag
-      ? { postTags: { some: { tag: { name: tag } } } }
-      : {};
+    const where: {
+      postTags?: { some: { tag: { name: string } } };
+      author?: { username: string };
+    } = {};
+
+    if (tag) {
+      where.postTags = { some: { tag: { name: tag } } };
+    }
+
+    if (author) {
+      where.author = { username: author };
+    }
 
     const posts = await db.post.findMany({
       where,
