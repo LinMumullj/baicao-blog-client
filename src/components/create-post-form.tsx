@@ -16,6 +16,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { MediaDropZone } from "@/components/media-drop-zone";
+import { EmojiPicker, insertAtCursor } from "@/components/emoji-picker";
 
 type MediaMode = "image" | "video";
 
@@ -32,6 +34,7 @@ interface CreatePostFormProps {
 export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<UploadedMedia[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -59,8 +62,7 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || []);
+  async function uploadFiles(files: File[]) {
     if (files.length === 0) return;
 
     if (mediaMode === "image" && media.length + files.length > 9) {
@@ -107,6 +109,31 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  }
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    await uploadFiles(files);
+  }
+
+  function handleEmojiSelect(emoji: string) {
+    const textarea = contentRef.current;
+    if (!textarea) {
+      setContent((value) => value + emoji);
+      return;
+    }
+
+    const { nextValue, nextCursor } = insertAtCursor(
+      content,
+      emoji,
+      textarea.selectionStart,
+      textarea.selectionEnd
+    );
+    setContent(nextValue);
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(nextCursor, nextCursor);
+    });
   }
 
   function removeMedia(index: number) {
@@ -186,53 +213,86 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
           />
         )}
 
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="分享你的想法..."
-          rows={isLongPost ? 8 : 4}
-          className="resize-none bg-background/60"
-        />
+        <div className="space-y-2">
+          <Textarea
+            ref={contentRef}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="分享你的想法..."
+            rows={isLongPost ? 8 : 4}
+            className="resize-none bg-background/60"
+          />
+          <div className="flex justify-end">
+            <EmojiPicker onSelect={handleEmojiSelect} disabled={publishing} />
+          </div>
+        </div>
 
-        {media.length > 0 && (
-          <div
-            className={mediaMode === "video" ? "" : "grid grid-cols-3 gap-2"}
+        {mediaMode === "image" ? (
+          <MediaDropZone
+            onFiles={uploadFiles}
+            accept="image/*"
+            multiple
+            disabled={
+              uploading || media.length >= 9 || publishing
+            }
           >
-            {media.map((m, i) => (
-              <div
-                key={i}
-                className={`group relative overflow-hidden rounded-lg bg-muted ${
-                  mediaMode === "video"
-                    ? "aspect-video w-full"
-                    : "aspect-square"
-                }`}
-              >
-                {m.type === "video" ? (
+            {media.length > 0 ? (
+              <div className="grid grid-cols-3 gap-2">
+                {media.map((m, i) => (
+                  <div
+                    key={i}
+                    className="group relative aspect-square overflow-hidden rounded-lg bg-muted"
+                  >
+                    <Image
+                      src={m.preview}
+                      alt={`预览 ${i + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="icon-xs"
+                      onClick={() => removeMedia(i)}
+                      className="absolute right-1.5 top-1.5 bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-border/60 bg-background/40 px-4 py-8 text-center text-sm text-muted-foreground">
+                拖拽图片到此处上传
+              </div>
+            )}
+          </MediaDropZone>
+        ) : (
+          media.length > 0 && (
+            <div>
+              {media.map((m, i) => (
+                <div
+                  key={i}
+                  className="group relative aspect-video w-full overflow-hidden rounded-lg bg-muted"
+                >
                   <video
                     src={m.preview}
                     controls
                     className="h-full w-full object-cover"
                   />
-                ) : (
-                  <Image
-                    src={m.preview}
-                    alt={`预览 ${i + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                )}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon-xs"
-                  onClick={() => removeMedia(i)}
-                  className="absolute right-1.5 top-1.5 bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon-xs"
+                    onClick={() => removeMedia(i)}
+                    className="absolute right-1.5 top-1.5 bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )
         )}
 
         <Separator />

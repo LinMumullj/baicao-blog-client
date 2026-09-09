@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { UserAvatar } from "@/components/user-avatar";
+import { MediaDropZone } from "@/components/media-drop-zone";
 
 export function AvatarUploadForm() {
   const { data: session, update } = useSession();
@@ -22,10 +23,7 @@ export function AvatarUploadForm() {
 
   if (!session?.user) return null;
 
-  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  async function uploadAvatar(file: File) {
     setUploading(true);
     setError("");
 
@@ -69,6 +67,12 @@ export function AvatarUploadForm() {
     }
   }
 
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadAvatar(file);
+  }
+
   return (
     <Card className="border-border/60 shadow-lg">
       <CardHeader>
@@ -76,30 +80,42 @@ export function AvatarUploadForm() {
         <CardDescription>上传头像，在评论和导航栏中展示</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-4 sm:flex-row">
-        <UserAvatar
-          username={session.user.name ?? "?"}
-          avatar={session.user.avatar}
-          size="lg"
-        />
-        <div className="space-y-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileSelect}
+        <MediaDropZone
+          onFiles={(files) => {
+            if (files[0]) uploadAvatar(files[0]);
+          }}
+          accept="image/*"
+          disabled={uploading}
+          className="flex flex-col items-center gap-4 sm:flex-row"
+        >
+          <UserAvatar
+            username={session.user.name ?? "?"}
+            avatar={session.user.avatar}
+            size="lg"
           />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-          >
-            <Upload className="h-4 w-4" />
-            {uploading ? "上传中..." : "更换头像"}
-          </Button>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-        </div>
+          <div className="space-y-2 text-center sm:text-left">
+            <p className="text-xs text-muted-foreground">
+              拖拽图片到头像区域上传
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              <Upload className="h-4 w-4" />
+              {uploading ? "上传中..." : "更换头像"}
+            </Button>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+          </div>
+        </MediaDropZone>
       </CardContent>
     </Card>
   );
