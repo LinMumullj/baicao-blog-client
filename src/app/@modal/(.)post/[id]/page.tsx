@@ -16,5 +16,7 @@ export default async function PostInterceptPage({
 
   if (!post) notFound();
 
-  return <PostOverlay post={post} />;
+  return (
+    <PostOverlay post={post} />
+  );
 }

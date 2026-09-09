@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-
-function isAdminRole(role?: string) {
-  return role === "ADMIN";
-}
+import { deleteOssObjectsByUrls } from "@/lib/oss";
+import { canModifyPost, isAdminRole } from "@/lib/post-access";
+import {
+  mediaTypeFromUrls,
+  validateMediaUrls,
+  type MediaUrlInput,
+} from "@/lib/post-media";
 
 export async function GET(
   _request: Request,
@@ -47,22 +50,42 @@ export async function PUT(
       return NextResponse.json({ error: "请先登录" }, { status: 401 });
     }
 
-    if (!isAdminRole(session.user.role)) {
-      return NextResponse.json({ error: "仅管理员可编辑动态" }, { status: 403 });
-    }
-
     const { id } = await params;
-    const existing = await db.post.findUnique({ where: { id } });
+    const existing = await db.post.findUnique({
+      where: { id },
+      include: { media: true },
+    });
 
     if (!existing) {
       return NextResponse.json({ error: "动态不存在" }, { status: 404 });
     }
 
+    if (!isAdminRole(session.user.role)) {
+      return NextResponse.json({ error: "仅管理员可编辑动态" }, { status: 403 });
+    }
+
     const body = await request.json();
-    const { content, title, isLongPost, tags } = body;
+    const { content, title, isLongPost, tags, mediaUrls } = body;
 
     if (!content || content.trim().length === 0) {
       return NextResponse.json({ error: "内容不能为空" }, { status: 400 });
+    }
+
+    const hasMediaUpdate = Array.isArray(mediaUrls);
+    let mediaList: MediaUrlInput[] = [];
+    let removedUrls: string[] = [];
+
+    if (hasMediaUpdate) {
+      mediaList = mediaUrls as MediaUrlInput[];
+      const mediaError = validateMediaUrls(mediaList);
+      if (mediaError) {
+        return NextResponse.json({ error: mediaError }, { status: 400 });
+      }
+
+      const nextUrls = new Set(mediaList.map((item) => item.url));
+      removedUrls = existing.media
+        .map((item) => item.url)
+        .filter((url) => !nextUrls.has(url));
     }
 
     const updated = await db.$transaction(async (tx) => {
@@ -72,8 +95,25 @@ export async function PUT(
           content: content.trim(),
           title: isLongPost && title ? title.trim() : null,
           isLongPost: !!isLongPost,
+          ...(hasMediaUpdate
+            ? { mediaType: mediaTypeFromUrls(mediaList) }
+            : {}),
         },
       });
+
+      if (hasMediaUpdate) {
+        await tx.media.deleteMany({ where: { postId: id } });
+        if (mediaList.length > 0) {
+          await tx.media.createMany({
+            data: mediaList.map((item, index) => ({
+              url: item.url,
+              type: item.type,
+              order: index,
+              postId: id,
+            })),
+          });
+        }
+      }
 
       if (Array.isArray(tags)) {
         await tx.postTag.deleteMany({ where: { postId: id } });
@@ -93,6 +133,14 @@ export async function PUT(
 
       return post;
     });
+
+    if (removedUrls.length > 0) {
+    try {
+      await deleteOssObjectsByUrls(removedUrls);
+    } catch (error) {
+      console.error("OSS cleanup failed after post update:", error);
+    }
+    }
 
     return NextResponse.json(updated);
   } catch {
@@ -114,18 +162,29 @@ export async function DELETE(
       return NextResponse.json({ error: "请先登录" }, { status: 401 });
     }
 
-    if (!isAdminRole(session.user.role)) {
-      return NextResponse.json({ error: "仅管理员可删除动态" }, { status: 403 });
-    }
-
     const { id } = await params;
-    const existing = await db.post.findUnique({ where: { id } });
+    const existing = await db.post.findUnique({
+      where: { id },
+      include: { media: true },
+    });
 
     if (!existing) {
-      return NextResponse.json({ error: "动态不存在" }, { status: 404 });
+      return NextResponse.json({ success: true });
     }
 
+    if (!canModifyPost(session.user, existing)) {
+      return NextResponse.json({ error: "无权删除此动态" }, { status: 403 });
+    }
+
+    const mediaUrls = existing.media.map((item) => item.url);
+
     await db.post.delete({ where: { id } });
+
+    try {
+      await deleteOssObjectsByUrls(mediaUrls);
+    } catch (error) {
+      console.error("OSS cleanup failed after post delete:", error);
+    }
 
     return NextResponse.json({ success: true });
   } catch {

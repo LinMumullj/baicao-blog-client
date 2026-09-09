@@ -97,7 +97,7 @@ export function MediaGrid({
       onClick={(e) => handleImageClick(0, e)}
     >
       {isOverlay ? (
-        <div className="relative h-full w-full min-h-[220px]">
+        <div className="relative aspect-[4/3] w-full max-md:max-h-[38vh] md:h-full md:min-h-[220px]">
           <Image
             src={images[0].url}
             alt="图片"

@@ -272,7 +272,7 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
                 ))}
               </div>
             ) : (
-              <div className="rounded-lg border border-dashed border-border/60 bg-background/40 px-4 py-8 text-center text-sm text-muted-foreground">
+              <div className="hidden rounded-lg border border-dashed border-border/60 bg-background/40 px-4 py-8 text-center text-sm text-muted-foreground lg:block">
                 拖拽图片到此处，发布时再上传
               </div>
             )}

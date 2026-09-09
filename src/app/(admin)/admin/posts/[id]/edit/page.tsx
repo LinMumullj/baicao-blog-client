@@ -14,7 +14,10 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
 
   const post = await db.post.findUnique({
     where: { id },
-    include: { postTags: { include: { tag: true } } },
+    include: {
+      media: { orderBy: { order: "asc" } },
+      postTags: { include: { tag: true } },
+    },
   });
 
   if (!post) notFound();
@@ -27,7 +30,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
           返回管理列表
         </Link>
       </Button>
-      <EditPostForm post={post} />
+      <EditPostForm post={post} successHref="/admin/posts" />
     </div>
   );
 }

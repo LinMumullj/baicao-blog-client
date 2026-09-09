@@ -27,7 +27,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
-          <aside className="lg:sticky lg:top-20 lg:self-start">
+          <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start">
             <Suspense
               fallback={
                 <div className="h-48 rounded-xl border border-border/40 bg-background/60 backdrop-blur-md" />

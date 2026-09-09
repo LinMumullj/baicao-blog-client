@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { MediaGrid } from "@/components/media-grid";
 import { UserAvatar } from "@/components/user-avatar";
 import { LikeButton } from "@/components/like-button";
+import { DeletePostButton } from "@/components/delete-post-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -33,6 +36,8 @@ interface PostCardProps {
       likes: number;
     };
   };
+  currentUserId?: string | null;
+  onDeleted?: (postId: string) => void;
 }
 
 function formatTime(dateStr: string) {
@@ -50,8 +55,9 @@ function formatTime(dateStr: string) {
   return date.toLocaleDateString("zh-CN");
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, currentUserId, onDeleted }: PostCardProps) {
   const postHref = `/post/${post.id}`;
+  const canManage = currentUserId === post.author.id;
   const displayContent =
     post.isLongPost && post.content.length > 200
       ? post.content.slice(0, 200) + "..."
@@ -61,7 +67,8 @@ export function PostCard({ post }: PostCardProps) {
     <Card className="gap-0 rounded-xl border-border/40 bg-background/80 py-0 shadow-sm backdrop-blur-md transition-colors hover:bg-background/90">
       <CardContent className="px-4 py-5">
         {/* Header */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
           <Link
             href={`/user/${encodeURIComponent(post.author.username)}`}
             className="shrink-0 rounded-full transition-opacity hover:opacity-80"
@@ -82,6 +89,13 @@ export function PostCard({ post }: PostCardProps) {
               {formatTime(post.createdAt)}
             </span>
           </div>
+          </div>
+          {canManage && (
+            <DeletePostButton
+              postId={post.id}
+              onSuccess={() => onDeleted?.(post.id)}
+            />
+          )}
         </div>
 
         {/* Content */}

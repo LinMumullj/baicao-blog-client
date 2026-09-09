@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { PostCard } from "@/components/post-card";
 import { CatLoader } from "@/components/cat-loader";
 import { Cat } from "lucide-react";
@@ -25,6 +26,7 @@ interface PostFeedProps {
 }
 
 export function PostFeed({ tag, author, refreshKey = 0 }: PostFeedProps) {
+  const { data: session } = useSession();
   const [posts, setPosts] = useState<Post[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -96,7 +98,14 @@ export function PostFeed({ tag, author, refreshKey = 0 }: PostFeedProps) {
   return (
     <div className="space-y-4">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard
+          key={post.id}
+          post={post}
+          currentUserId={session?.user?.id}
+          onDeleted={(postId) =>
+            setPosts((prev) => prev.filter((item) => item.id !== postId))
+          }
+        />
       ))}
 
       {/* Infinite scroll sentinel */}

@@ -19,16 +19,16 @@ export function PostCommentsSection({
 
   if (variant === "overlay") {
     return (
-      <section className="flex min-h-0 flex-1 flex-col">
-        <div className="shrink-0 px-4 py-2.5">
+      <section className="flex flex-col md:min-h-0 md:flex-1">
+        <div className="shrink-0 border-b border-border/40 px-4 py-2.5 md:border-b-0">
           <h2 className="text-sm font-medium text-muted-foreground">
             评论{commentCount !== undefined ? ` · ${commentCount}` : ""}
           </h2>
         </div>
-        <div className="overlay-scroll min-h-0 flex-1 overflow-y-auto px-4 pb-3">
+        <div className="px-4 py-3 md:overlay-scroll md:min-h-0 md:flex-1 md:overflow-y-auto md:pb-3">
           <CommentList postId={postId} refreshKey={refreshKey} compact />
         </div>
-        <div className="shrink-0 border-t border-border/40 px-4 py-3">
+        <div className="shrink-0 border-t border-border/40 bg-background/95 px-4 py-3 max-md:sticky max-md:bottom-0 max-md:backdrop-blur-md">
           <CommentForm
             postId={postId}
             onCommentAdded={() => setRefreshKey((k) => k + 1)}

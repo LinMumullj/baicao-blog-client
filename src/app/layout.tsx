@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
+import { ConditionalFooter } from "@/components/conditional-footer";
 import { AuthProvider } from "@/components/providers/auth-provider";
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export default function RootLayout({
             {children}
             {modal}
           </main>
-          <Footer />
+          <ConditionalFooter />
         </AuthProvider>
       </body>
     </html>

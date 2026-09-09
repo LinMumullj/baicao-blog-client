@@ -103,7 +103,8 @@ export function AvatarUploadForm() {
           />
           <div className="space-y-2 text-center sm:text-left">
             <p className="text-xs text-muted-foreground">
-              拖拽图片到头像区域上传
+              <span className="hidden lg:inline">拖拽图片到头像区域上传</span>
+              <span className="lg:hidden">点击下方按钮选择图片</span>
             </p>
             <input
               ref={fileInputRef}
