@@ -79,7 +79,7 @@ export function MediaDropZone({
       {children}
       {dragging && !disabled && (
         <div className="pointer-events-none mt-2 rounded-md border border-dashed border-border/80 bg-muted/40 px-3 py-2 text-center text-xs text-muted-foreground">
-          松开以上传图片
+          松开以选择图片
         </div>
       )}
     </div>

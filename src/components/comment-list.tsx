@@ -14,9 +14,14 @@ interface Comment {
 interface CommentListProps {
   postId: string;
   refreshKey?: number;
+  compact?: boolean;
 }
 
-export function CommentList({ postId, refreshKey = 0 }: CommentListProps) {
+export function CommentList({
+  postId,
+  refreshKey = 0,
+  compact = false,
+}: CommentListProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,14 +46,16 @@ export function CommentList({ postId, refreshKey = 0 }: CommentListProps) {
 
   if (comments.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
+      <p
+        className={`text-center text-sm text-muted-foreground ${compact ? "py-6" : "py-8"}`}
+      >
         暂无评论，来抢沙发吧
       </p>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className={compact ? "space-y-3" : "space-y-4"}>
       {comments.map((comment) => {
         const timeStr = new Date(comment.createdAt).toLocaleString("zh-CN", {
           month: "short",
@@ -58,7 +65,7 @@ export function CommentList({ postId, refreshKey = 0 }: CommentListProps) {
         });
 
         return (
-          <div key={comment.id} className="flex gap-3">
+          <div key={comment.id} className="flex gap-2.5">
             <UserAvatar
               username={comment.author.username}
               avatar={comment.author.avatar}
@@ -69,7 +76,7 @@ export function CommentList({ postId, refreshKey = 0 }: CommentListProps) {
                 <span className="font-medium">{comment.author.username}</span>
                 <span className="text-xs text-muted-foreground">{timeStr}</span>
               </div>
-              <p className="mt-1 text-sm leading-relaxed text-foreground/90">
+              <p className="mt-0.5 text-sm leading-relaxed text-foreground/90">
                 {comment.content}
               </p>
             </div>

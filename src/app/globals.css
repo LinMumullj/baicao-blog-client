@@ -53,3 +53,24 @@ body {
 .animate-like-bounce {
   animation: like-bounce 0.3s ease-out;
 }
+
+.overlay-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.overlay-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overlay-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 9999px;
+}
+
+.home-hero-bg {
+  height: 100vh;
+  height: 100lvh;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

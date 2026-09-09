@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { decodeRouteParam } from "@/lib/route-params";
 import { UserAvatar } from "@/components/user-avatar";
 import { AuthorFeed } from "@/components/author-feed";
 
@@ -8,7 +9,8 @@ interface AuthorPageProps {
 }
 
 export default async function AuthorPage({ params }: AuthorPageProps) {
-  const { username } = await params;
+  const { username: rawUsername } = await params;
+  const username = decodeRouteParam(rawUsername);
 
   const author = await db.user.findUnique({
     where: { username },

@@ -19,8 +19,10 @@ export function PostOverlay({ post }: PostOverlayProps) {
         if (!open) router.back();
       }}
     >
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto p-6 sm:max-w-2xl">
-        <PostDetailView post={post} variant="overlay" />
+      <DialogContent className="flex h-[min(720px,88vh)] w-[min(960px,calc(100%-2rem))] max-w-[960px] flex-col overflow-hidden p-0 sm:max-w-[960px]">
+        <div className="min-h-0 flex-1 overflow-hidden pr-10">
+          <PostDetailView post={post} variant="overlay" />
+        </div>
       </DialogContent>
     </Dialog>
   );

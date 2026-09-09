@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Cat } from "lucide-react";
@@ -18,6 +18,26 @@ import {
 } from "@/components/ui/card";
 
 export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
+          <Card className="w-full max-w-sm border-border/60 shadow-lg">
+            <CardHeader className="items-center text-center">
+              <Cat className="mb-2 h-10 w-10" />
+              <CardTitle className="text-2xl">欢迎回来</CardTitle>
+              <CardDescription>登录你的百草账号</CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -113,3 +133,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

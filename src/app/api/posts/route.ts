@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { decodeRouteParam } from "@/lib/route-params";
 
 const PAGE_SIZE = 10;
 
@@ -107,7 +108,8 @@ export async function GET(request: Request) {
       50
     );
     const tag = searchParams.get("tag");
-    const author = searchParams.get("author");
+    const authorParam = searchParams.get("author");
+    const author = authorParam ? decodeRouteParam(authorParam) : null;
 
     const where: {
       postTags?: { some: { tag: { name: string } } };

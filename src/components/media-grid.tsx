@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { ImageLightbox } from "@/components/image-lightbox";
 
 interface MediaItem {
   id: string;
@@ -13,21 +15,66 @@ interface MediaItem {
 interface MediaGridProps {
   media: MediaItem[];
   onImageClick?: (index: number) => void;
+  variant?: "default" | "overlay";
+  lightbox?: boolean;
 }
 
-export function MediaGrid({ media, onImageClick }: MediaGridProps) {
+export function MediaGrid({
+  media,
+  onImageClick,
+  variant = "default",
+  lightbox = true,
+}: MediaGridProps) {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
   if (media.length === 0) return null;
 
+  const isOverlay = variant === "overlay";
   const images = media.filter((m) => m.type === "image");
   const video = media.find((m) => m.type === "video");
 
+  function handleImagePointerDown(e: React.PointerEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function handleImageClick(index: number, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (onImageClick) {
+      onImageClick(index);
+      return;
+    }
+
+    if (lightbox) {
+      setLightboxIndex(index);
+    }
+  }
+
+  const lightboxImages = images.map((img, i) => ({
+    url: img.url,
+    alt: `图片 ${i + 1}`,
+  }));
+
   if (video) {
     return (
-      <div className="mt-3 overflow-hidden rounded-sm">
+      <div
+        className={cn(
+          "overflow-hidden",
+          isOverlay
+            ? "flex h-full w-full items-center justify-center p-3"
+            : "mt-3 rounded-sm"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
         <video
           src={video.url}
           controls
-          className="w-full max-h-96 bg-muted object-contain"
+          className={cn(
+            "bg-muted object-contain",
+            isOverlay ? "max-h-full max-w-full" : "max-h-96 w-full"
+          )}
           preload="metadata"
         />
       </div>
@@ -38,48 +85,76 @@ export function MediaGrid({ media, onImageClick }: MediaGridProps) {
 
   const count = images.length;
 
-  if (count === 1) {
-    const img = images[0];
-    return (
-      <div
-        className="mt-3 cursor-pointer overflow-hidden rounded-sm bg-muted"
-        onClick={() => onImageClick?.(0)}
-      >
+  const grid = count === 1 ? (
+    <div
+      className={cn(
+        "cursor-zoom-in overflow-hidden bg-muted",
+        isOverlay
+          ? "flex h-full w-full items-center justify-center p-3"
+          : "mt-3 rounded-sm"
+      )}
+      onPointerDown={handleImagePointerDown}
+      onClick={(e) => handleImageClick(0, e)}
+    >
+      {isOverlay ? (
+        <div className="relative h-full w-full min-h-[220px]">
+          <Image
+            src={images[0].url}
+            alt="图片"
+            fill
+            className="object-contain"
+            sizes="480px"
+          />
+        </div>
+      ) : (
         <Image
-          src={img.url}
+          src={images[0].url}
           alt="图片"
           width={1200}
           height={900}
           className="max-h-96 w-full object-contain"
           sizes="(max-width: 768px) 100vw, 768px"
         />
-      </div>
-    );
-  }
-
-  const gridClass = cn(
-    "mt-3 grid gap-1 overflow-hidden rounded-sm",
-    count === 2 && "grid-cols-2",
-    count >= 3 && "grid-cols-3"
-  );
-
-  return (
-    <div className={gridClass}>
+      )}
+    </div>
+  ) : (
+    <div
+      className={cn(
+        "grid gap-1 overflow-hidden",
+        isOverlay ? "h-full w-full content-center p-3" : "mt-3 rounded-sm",
+        count === 2 && "grid-cols-2",
+        count >= 3 && "grid-cols-3"
+      )}
+    >
       {images.map((img, index) => (
         <div
           key={img.id}
-          className="relative aspect-square cursor-pointer overflow-hidden bg-muted"
-          onClick={() => onImageClick?.(index)}
+          className="relative aspect-square cursor-zoom-in overflow-hidden bg-muted"
+          onPointerDown={handleImagePointerDown}
+          onClick={(e) => handleImageClick(index, e)}
         >
           <Image
             src={img.url}
             alt={`图片 ${index + 1}`}
             fill
             className="object-cover transition-opacity hover:opacity-90"
-            sizes={count === 2 ? "50vw" : "33vw"}
+            sizes={count === 2 ? "240px" : "160px"}
           />
         </div>
       ))}
     </div>
+  );
+
+  return (
+    <>
+      {grid}
+      {lightbox && (
+        <ImageLightbox
+          images={lightboxImages}
+          index={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+        />
+      )}
+    </>
   );
 }

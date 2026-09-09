@@ -1,15 +1,9 @@
+# 首次部署：仅 HTTP，供 certbot 申请证书
+# 执行 certbot --nginx -d mybaicao.com 后会自动添加 HTTPS 配置
+
 server {
     listen 80;
-    server_name mybaicao.com;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name mybaicao.com;
-
-    ssl_certificate /etc/letsencrypt/live/mybaicao.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/mybaicao.com/privkey.pem;
+    server_name mybaicao.com www.mybaicao.com;
 
     location /_next/static/ {
         alias /var/www/baicao-blog-client/.next/static/;
@@ -25,6 +19,7 @@ server {
     }
 
     location / {
+        client_max_body_size 50m;
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;

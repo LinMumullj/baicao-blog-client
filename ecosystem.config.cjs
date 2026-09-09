@@ -2,7 +2,8 @@ module.exports = {
   apps: [
     {
       name: "baicao-blog",
-      script: ".next/standalone/server.js",
+      script: "npm",
+      args: "run start",
       cwd: "/var/www/baicao-blog-client",
       instances: 1,
       exec_mode: "fork",

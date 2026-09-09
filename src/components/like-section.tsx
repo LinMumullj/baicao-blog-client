@@ -9,45 +9,48 @@ interface LikeSectionProps {
   postId: string;
   initialLikeCount: number;
   initialIsLiked: boolean;
+  compact?: boolean;
 }
 
 export function LikeSection({
   postId,
   initialLikeCount,
   initialIsLiked,
+  compact = false,
 }: LikeSectionProps) {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [listOpen, setListOpen] = useState(false);
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-3">
+    <>
+      <div
+        className={
+          compact
+            ? "flex items-center gap-2.5"
+            : "space-y-3"
+        }
+      >
         <LikeButton
           postId={postId}
           initialLikeCount={likeCount}
           initialIsLiked={initialIsLiked}
           onLikeCountChange={setLikeCount}
+          showCount={!compact}
         />
         {likeCount > 0 && (
-          <button
-            type="button"
-            onClick={() => setListOpen(true)}
-            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            查看点赞者
-          </button>
+          <LikeAvatarsPreview
+            postId={postId}
+            likeCount={likeCount}
+            onExpand={() => setListOpen(true)}
+            compact={compact}
+          />
         )}
       </div>
-      <LikeAvatarsPreview
-        postId={postId}
-        likeCount={likeCount}
-        onExpand={() => setListOpen(true)}
-      />
       <LikeListDialog
         postId={postId}
         open={listOpen}
         onOpenChange={setListOpen}
       />
-    </div>
+    </>
   );
 }

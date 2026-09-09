@@ -11,6 +11,7 @@ interface LikeButtonProps {
   initialLikeCount: number;
   initialIsLiked: boolean;
   onLikeCountChange?: (count: number) => void;
+  showCount?: boolean;
 }
 
 export function LikeButton({
@@ -18,6 +19,7 @@ export function LikeButton({
   initialLikeCount,
   initialIsLiked,
   onLikeCountChange,
+  showCount = true,
 }: LikeButtonProps) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -86,7 +88,9 @@ export function LikeButton({
       <Heart
         className={`h-4 w-4 transition-colors ${liked ? "fill-foreground text-foreground" : ""} ${animating ? "animate-like-bounce" : ""}`}
       />
-      {likeCount > 0 && <span className="text-xs">{likeCount}</span>}
+      {showCount && likeCount > 0 && (
+        <span className="text-xs">{likeCount}</span>
+      )}
     </Button>
   );
 }

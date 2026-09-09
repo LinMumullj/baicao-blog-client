@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { getMaxUploadBytes } from "@/lib/upload-limits";
 
 interface OSSConfig {
   region: string;
@@ -24,12 +25,13 @@ export function generateUploadParams(filename: string, contentType: string) {
   const key = `uploads/${Date.now()}-${crypto.randomUUID()}.${ext}`;
 
   const expiration = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+  const maxBytes = getMaxUploadBytes(contentType);
 
   const policy = Buffer.from(
     JSON.stringify({
       expiration,
       conditions: [
-        ["content-length-range", 0, 50 * 1024 * 1024],
+        ["content-length-range", 0, maxBytes],
         { bucket: config.bucket },
         { key },
         ["starts-with", "$Content-Type", contentType.split("/")[0]],

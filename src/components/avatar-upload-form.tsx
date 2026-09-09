@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { UserAvatar } from "@/components/user-avatar";
 import { MediaDropZone } from "@/components/media-drop-zone";
+import { validateUploadFileSize } from "@/lib/upload-limits";
 
 export function AvatarUploadForm() {
   const { data: session, update } = useSession();
@@ -24,6 +25,13 @@ export function AvatarUploadForm() {
   if (!session?.user) return null;
 
   async function uploadAvatar(file: File) {
+    const sizeError = validateUploadFileSize(file);
+    if (sizeError) {
+      setError(sizeError);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setUploading(true);
     setError("");
 

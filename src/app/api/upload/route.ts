@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { uploadFileToOSS } from "@/lib/oss";
+import { validateUploadFileSize } from "@/lib/upload-limits";
 
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
@@ -46,6 +47,11 @@ export async function POST(request: Request) {
       files.map(async (file) => {
         if (!ALLOWED_TYPES.includes(file.type)) {
           throw new Error(`不支持的文件类型: ${file.type}`);
+        }
+
+        const sizeError = validateUploadFileSize(file);
+        if (sizeError) {
+          throw new Error(sizeError);
         }
 
         const result = await uploadFileToOSS(file, file.name, file.type);

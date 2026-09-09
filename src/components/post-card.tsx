@@ -51,6 +51,7 @@ function formatTime(dateStr: string) {
 }
 
 export function PostCard({ post }: PostCardProps) {
+  const postHref = `/post/${post.id}`;
   const displayContent =
     post.isLongPost && post.content.length > 200
       ? post.content.slice(0, 200) + "..."
@@ -70,7 +71,7 @@ export function PostCard({ post }: PostCardProps) {
               avatar={post.author.avatar}
             />
           </Link>
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <Link
               href={`/user/${encodeURIComponent(post.author.username)}`}
               className="text-sm font-medium hover:underline"
@@ -84,23 +85,24 @@ export function PostCard({ post }: PostCardProps) {
         </div>
 
         {/* Content */}
-        <Link href={`/post/${post.id}`} className="block">
+        <Link
+          href={postHref}
+          className="mt-3 block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           {post.title && (
-            <h2 className="mt-3 text-lg font-semibold tracking-tight">
-              {post.title}
-            </h2>
+            <h2 className="text-lg font-semibold tracking-tight">{post.title}</h2>
           )}
           <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
             {displayContent}
           </p>
           {post.isLongPost && post.content.length > 200 && (
-            <span className="mt-1 inline-block text-sm text-muted-foreground hover:text-foreground">
+            <span className="mt-1 inline-block text-sm text-muted-foreground">
               查看全文 →
             </span>
           )}
         </Link>
 
-        {/* Media */}
+        {/* Media: outside Link so lightbox does not trigger post navigation */}
         <MediaGrid media={post.media} />
 
         {/* Tags */}
@@ -124,7 +126,7 @@ export function PostCard({ post }: PostCardProps) {
             initialIsLiked={post.isLiked ?? false}
           />
           <Link
-            href={`/post/${post.id}`}
+            href={postHref}
             className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <MessageCircle className="h-4 w-4" />
