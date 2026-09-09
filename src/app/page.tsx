@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { HomeContent } from "@/components/home-content";
 import { PostLeaderboard } from "@/components/post-leaderboard";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 interface HomePageProps {
   searchParams: Promise<{ tag?: string; author?: string }>;
@@ -42,6 +43,8 @@ export default async function Home({ searchParams }: HomePageProps) {
           </main>
         </div>
       </div>
+
+      <ScrollToTop />
     </div>
   );
 }

@@ -79,17 +79,17 @@ function PostOverlayLayout({ post }: { post: PostDetailData }) {
     <div
       className={
         hasMedia
-          ? "flex flex-col md:h-full md:min-h-0 md:grid md:grid-cols-[1.05fr_1fr] md:overflow-hidden"
-          : "flex flex-col md:h-full md:min-h-0 md:overflow-hidden"
+          ? "grid h-full min-h-0 grid-cols-1 overflow-y-auto md:grid-cols-[1.05fr_1fr] md:overflow-hidden"
+          : "flex h-full min-h-0 flex-col overflow-hidden"
       }
     >
       {hasMedia && (
-        <div className="relative shrink-0 border-b border-border/40 bg-muted/20 max-md:max-h-[40vh] md:flex md:min-h-0 md:items-center md:justify-center">
+        <div className="relative min-h-0 overflow-hidden border-b border-border/40 bg-muted/20 max-md:max-h-[40vh] md:h-full md:border-b-0">
           <MediaGrid media={post.media} variant="overlay" />
         </div>
       )}
 
-      <div className="flex flex-col md:min-h-0 md:overflow-hidden md:border-l md:border-border/40">
+      <div className="flex min-h-0 min-w-0 flex-col md:h-full md:overflow-hidden md:border-l md:border-border/40">
         <div className="shrink-0 space-y-3 border-b border-border/40 px-4 py-3 md:py-4">
           <AuthorHeader post={post} />
           <PostTextContent post={post} />

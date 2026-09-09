@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { TagInput } from "@/components/tag-input";
 import { MediaDropZone } from "@/components/media-drop-zone";
 import { validateUploadFileSize } from "@/lib/upload-limits";
+import { uploadFilesSequentially } from "@/lib/upload-client";
 import {
   Card,
   CardContent,
@@ -115,22 +116,7 @@ export function EditPostForm({ post, successHref }: EditPostFormProps) {
 
   async function uploadPendingMedia(items: Extract<MediaItem, { source: "pending" }>[]) {
     if (items.length === 0) return [];
-
-    const formData = new FormData();
-    items.forEach((item) => formData.append("files", item.file));
-
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "上传失败");
-    }
-
-    const { uploads } = await res.json();
-    return uploads as { url: string; type: string }[];
+    return uploadFilesSequentially(items.map((item) => item.file));
   }
 
   async function handleSave() {

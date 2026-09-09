@@ -23,7 +23,7 @@ export function EmojiPicker({ onSelect, disabled }: EmojiPickerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative hidden lg:block">
       <Button
         type="button"
         variant="outline"
