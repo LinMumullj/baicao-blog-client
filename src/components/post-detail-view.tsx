@@ -1,66 +1,48 @@
-import { notFound } from "next/navigation";
-import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+"use client";
+
+import Link from "next/link";
 import { MediaGrid } from "@/components/media-grid";
 import { UserAvatar } from "@/components/user-avatar";
 import { LikeButton } from "@/components/like-button";
 import { PostCommentsSection } from "@/components/post-comments-section";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import type { PostDetailData } from "@/lib/post-detail";
 
-interface PostDetailPageProps {
-  params: Promise<{ id: string }>;
+interface PostDetailViewProps {
+  post: PostDetailData;
+  variant?: "page" | "overlay";
 }
 
-export default async function PostDetailPage({ params }: PostDetailPageProps) {
-  const { id } = await params;
-  const session = await auth();
-
-  const post = await db.post.findUnique({
-    where: { id },
-    include: {
-      author: { select: { id: true, username: true, avatar: true } },
-      media: { orderBy: { order: "asc" } },
-      postTags: { include: { tag: true } },
-      _count: { select: { comments: true, likes: true } },
-    },
-  });
-
-  if (!post) notFound();
-
-  let isLiked = false;
-  if (session?.user?.id) {
-    const like = await db.like.findUnique({
-      where: {
-        userId_postId: { userId: session.user.id, postId: id },
-      },
-    });
-    isLiked = !!like;
-  }
+export function PostDetailView({ post, variant = "page" }: PostDetailViewProps) {
+  const cardClassName =
+    variant === "overlay"
+      ? "border-0 bg-transparent shadow-none"
+      : "border-border/60 shadow-none";
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
-      <Button variant="ghost" size="sm" asChild className="mb-6 -ml-2">
-        <Link href="/">
-          <ArrowLeft className="h-4 w-4" />
-          返回
-        </Link>
-      </Button>
-
-      <Card className="border-border/60 shadow-none">
-        <CardContent className="pt-6">
+    <>
+      <Card className={cardClassName}>
+        <CardContent className={variant === "overlay" ? "p-0 pt-0" : "pt-6"}>
           <div className="flex items-center gap-3">
-            <UserAvatar
-              username={post.author.username}
-              avatar={post.author.avatar}
-              size="lg"
-            />
+            <Link
+              href={`/user/${encodeURIComponent(post.author.username)}`}
+              className="shrink-0 rounded-full ring-offset-background transition-opacity hover:opacity-80"
+            >
+              <UserAvatar
+                username={post.author.username}
+                avatar={post.author.avatar}
+                size="lg"
+              />
+            </Link>
             <div>
-              <p className="font-medium">{post.author.username}</p>
+              <Link
+                href={`/user/${encodeURIComponent(post.author.username)}`}
+                className="font-medium hover:underline"
+              >
+                {post.author.username}
+              </Link>
               <p className="text-xs text-muted-foreground">
                 {new Date(post.createdAt).toLocaleString("zh-CN")}
               </p>
@@ -95,17 +77,17 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
           <div className="flex items-center gap-4">
             <LikeButton
               postId={post.id}
-              initialLikeCount={post._count.likes}
-              initialIsLiked={isLiked}
+              initialLikeCount={post.likeCount}
+              initialIsLiked={post.isLiked}
             />
             <span className="text-sm text-muted-foreground">
-              {post._count.comments} 条评论
+              {post.commentCount} 条评论
             </span>
           </div>
         </CardContent>
       </Card>
 
       <PostCommentsSection postId={post.id} />
-    </div>
+    </>
   );
 }
