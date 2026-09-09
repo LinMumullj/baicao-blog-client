@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { MediaGrid } from "@/components/media-grid";
 import { UserAvatar } from "@/components/user-avatar";
-import { LikeButton } from "@/components/like-button";
+import { LikeSection } from "@/components/like-section";
 import { PostCommentsSection } from "@/components/post-comments-section";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -75,7 +75,7 @@ export function PostDetailView({ post, variant = "page" }: PostDetailViewProps) 
           <Separator className="my-6" />
 
           <div className="flex items-center gap-4">
-            <LikeButton
+            <LikeSection
               postId={post.id}
               initialLikeCount={post.likeCount}
               initialIsLiked={post.isLiked}

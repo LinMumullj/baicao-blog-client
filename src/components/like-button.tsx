@@ -10,18 +10,26 @@ interface LikeButtonProps {
   postId: string;
   initialLikeCount: number;
   initialIsLiked: boolean;
+  onLikeCountChange?: (count: number) => void;
 }
 
 export function LikeButton({
   postId,
   initialLikeCount,
   initialIsLiked,
+  onLikeCountChange,
 }: LikeButtonProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [liked, setLiked] = useState(initialIsLiked);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [pending, setPending] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  function updateLikeCount(count: number) {
+    setLikeCount(count);
+    onLikeCountChange?.(count);
+  }
 
   async function handleClick() {
     if (!session?.user) {
@@ -33,9 +41,14 @@ export function LikeButton({
 
     const prevLiked = liked;
     const prevCount = likeCount;
+    const nextLiked = !liked;
 
-    setLiked(!liked);
-    setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+    setLiked(nextLiked);
+    updateLikeCount(nextLiked ? likeCount + 1 : likeCount - 1);
+    if (nextLiked) {
+      setAnimating(true);
+      window.setTimeout(() => setAnimating(false), 300);
+    }
     setPending(true);
 
     try {
@@ -47,16 +60,16 @@ export function LikeButton({
 
       if (!res.ok) {
         setLiked(prevLiked);
-        setLikeCount(prevCount);
+        updateLikeCount(prevCount);
         return;
       }
 
       const data = await res.json();
       setLiked(data.liked);
-      setLikeCount(data.likeCount);
+      updateLikeCount(data.likeCount);
     } catch {
       setLiked(prevLiked);
-      setLikeCount(prevCount);
+      updateLikeCount(prevCount);
     } finally {
       setPending(false);
     }
@@ -71,7 +84,7 @@ export function LikeButton({
       className="h-8 gap-1.5 px-2 text-muted-foreground hover:text-foreground"
     >
       <Heart
-        className={`h-4 w-4 transition-colors ${liked ? "fill-foreground text-foreground" : ""}`}
+        className={`h-4 w-4 transition-colors ${liked ? "fill-foreground text-foreground" : ""} ${animating ? "animate-like-bounce" : ""}`}
       />
       {likeCount > 0 && <span className="text-xs">{likeCount}</span>}
     </Button>
